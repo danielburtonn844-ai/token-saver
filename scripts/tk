@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# tk — 一行压缩：cmd 2>&1 | tk [预算token]
+# 例：npm run build 2>&1 | tk 1200
+set -euo pipefail
+BUDGET="${1:-1500}"
+exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/compress_toolout.py" --budget "$BUDGET"
