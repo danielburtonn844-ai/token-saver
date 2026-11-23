@@ -5,6 +5,8 @@ import sys
 import tempfile
 import unittest
 
+from token_saver import __version__
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PY = sys.executable
 SCRIPTS = os.path.join(ROOT, "scripts")
@@ -20,7 +22,7 @@ class TestCompressCLI(unittest.TestCase):
     def test_version(self):
         r = run([os.path.join(SCRIPTS, "compress_toolout.py"), "--version"])
         self.assertEqual(r.returncode, 0)
-        self.assertIn("2.1.0", r.stdout.decode())
+        self.assertIn(__version__, r.stdout.decode())
 
     def test_binary_stdin(self):
         r = run([os.path.join(SCRIPTS, "compress_toolout.py")], stdin=b"\x00\x01\x02" * 500)
@@ -135,7 +137,7 @@ class TestDoctorCLI(unittest.TestCase):
         r = run([os.path.join(SCRIPTS, "tk_doctor.py"), "--json"])
         payload = json.loads(r.stdout.decode())
         self.assertIn("checks", payload)
-        self.assertEqual(payload["version"], "2.1.0")
+        self.assertEqual(payload["version"], __version__)
 
     def test_module_entry(self):
         r = run(["-m", "token_saver", "doctor", "--json"])

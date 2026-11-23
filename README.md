@@ -4,7 +4,7 @@
 
 **省 token 的作业规范与配套工具**
 
-版本 `v2.1.0` · Python 3.9+ · 零第三方依赖
+版本 `v2.1.1` · Python 3.9+ · 零第三方依赖
 
 [![CI](https://github.com/danielburtonn844-ai/token-saver/actions/workflows/ci.yml/badge.svg)](https://github.com/danielburtonn844-ai/token-saver/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

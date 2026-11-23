@@ -8,7 +8,7 @@
 """
 from __future__ import annotations
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 __all__ = ["__version__", "est_tokens"]
 
 from .text import est_tokens  # noqa: E402,F401

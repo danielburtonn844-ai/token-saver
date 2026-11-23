@@ -5,6 +5,8 @@ import sys
 import tempfile
 import unittest
 
+from token_saver import __version__
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASH = shutil.which("bash")
 IS_POSIX = BASH is not None and os.name != "nt"
@@ -164,7 +166,7 @@ class TestInstallFlow(unittest.TestCase):
         tk = os.path.join(self.skill(), "scripts", "compress_toolout.py")
         r = subprocess.run([sys.executable, tk, "--version"], capture_output=True, timeout=60)
         self.assertEqual(r.returncode, 0)
-        self.assertIn("2.1.0", r.stdout.decode())
+        self.assertIn(__version__, r.stdout.decode())
 
 
 if __name__ == "__main__":

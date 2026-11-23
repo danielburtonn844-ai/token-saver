@@ -1,14 +1,14 @@
 ---
 name: token-saver
 description: 省 token 但不降智的完整作业体系（v2.1）。当用户提到省 TK / 省 token / 上下文太长 / 贵 / 慢，或任务需要多轮工具调用、批量读文件、爬网页、长会话时加载。核心判据：省的是「搬运」，不是「核实」。含成本模型、工具输出压缩协议、子代理经济学、跨会话 HANDOVER、缓存友好、反降智红线与自检脚本。
-version: 2.1.0
+version: 2.1.1
 license: MIT
 allowed-tools: [Read, Grep, Glob, Shell, Bash, Edit, Write]
 ---
 
 # token-saver v2 —— 省 TK 不降智
 
-> 版本 2.1.0 · 工具链可复现基准见 `bench/RESULTS.md`
+> 版本 2.1.1 · 工具链可复现基准见 `bench/RESULTS.md`
 >
 > 一句话总纲：**省「搬运」，不省「核实」；省「重复」，不省「推理」。**
 > 任何能降低结论可靠性的地方，一分钱都不许省。

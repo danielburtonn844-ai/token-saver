@@ -45,12 +45,13 @@ class TestScripts(unittest.TestCase):
                     self.assertEqual(r.returncode, 0, r.stderr.decode())
 
     def test_every_cli_has_version(self):
+        from token_saver import __version__
         for name in ("compress_toolout.py", "tk_audit.py", "ctx_pack.py", "tk_doctor.py"):
             path = os.path.join(ROOT, "scripts", name)
             with self.subTest(script=name):
                 r = subprocess.run([PY, path, "--version"], capture_output=True)
                 self.assertEqual(r.returncode, 0)
-                self.assertIn("2.1.0", r.stdout.decode())
+                self.assertIn(__version__, r.stdout.decode())
 
     def test_no_third_party_imports(self):
         """核心包必须零依赖：不许出现 requests/rich 之类。"""
