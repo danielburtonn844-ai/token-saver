@@ -5,7 +5,7 @@ import json
 import os
 from dataclasses import asdict, dataclass
 
-from .text import CJK, clean_ansi, est_tokens, looks_binary
+from .text import CJK, clean_ansi, est_tokens, looks_binary, read_text
 
 __all__ = ["Entry", "build_card", "collect_files", "to_json"]
 
@@ -93,11 +93,11 @@ def _count_lines(path: str) -> int:
     return n
 
 
-def _summary(path: str) -> str:
+def _summary(path: str, encoding: str = "auto") -> str:
     """取前 80 行里第一句有意义的注释或代码，作为一行摘要。"""
     try:
-        with open(path, "r", encoding="utf-8", errors="ignore") as fh:
-            lines = fh.readlines()[:80]
+        text, _, _ = read_text(path, 256 * 1024, encoding)
+        lines = text.splitlines()[:80]
     except OSError:
         return ""
     for ln in lines:
@@ -119,21 +119,23 @@ def _summary(path: str) -> str:
     return ""
 
 
-def _file_tokens(path: str) -> int:
+def _file_tokens(path: str, encoding: str = "auto") -> int:
     try:
-        with open(path, "r", encoding="utf-8", errors="ignore") as fh:
-            return est_tokens(clean_ansi(fh.read()))
+        text, _, _ = read_text(path, 2 * 1024 * 1024, encoding)
+        return est_tokens(clean_ansi(text))
     except OSError:
         return 0
 
 
 def build_card(root: str, depth: int = 4, max_files: int = 120,
-               include: list[str] | None = None, exclude: list[str] | None = None):
+               include: list[str] | None = None, exclude: list[str] | None = None,
+               encoding: str = "auto"):
     """生成索引卡。返回 (markdown, entries)。"""
     files = collect_files(root, depth, max_files, include, exclude)
     entries: list[Entry] = []
     for p, rel, size in files:
-        entries.append(Entry(rel, size, _count_lines(p), _file_tokens(p), _summary(p)))
+        entries.append(Entry(rel, size, _count_lines(p),
+                             _file_tokens(p, encoding), _summary(p, encoding)))
     entries.sort(key=lambda e: e.tokens, reverse=True)
 
     total_tok = sum(e.tokens for e in entries)

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "token-saver"
-version = "2.1.1"
+version = "2.1.0"
 description = "省 token 但不降智：工具输出压缩、token 体检、目录索引卡、跨会话交接单"
 readme = "README.md"
 requires-python = ">=3.9"

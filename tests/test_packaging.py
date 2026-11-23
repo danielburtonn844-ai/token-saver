@@ -34,6 +34,11 @@ class TestVersionConsistency(unittest.TestCase):
         from token_saver import __version__
         self.assertIn("## " + __version__, read("CHANGELOG.md"))
 
+    def test_readme_version(self):
+        from token_saver import __version__
+        self.assertIn("v" + __version__, read("README.md"))
+        self.assertNotIn("2.1.1", read("CHANGELOG.md"))
+
 
 class TestScripts(unittest.TestCase):
     def test_all_compile(self):

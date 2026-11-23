@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from .text import MAX_BYTES, clean_ansi, est_tokens, looks_binary, read_bytes
+from .text import MAX_BYTES, clean_ansi, decode_bytes, est_tokens, looks_binary, read_bytes
 
 __all__ = ["PROFILES", "CompressResult", "compress", "detect_profile", "load_input", "Stats"]
 
@@ -55,6 +55,7 @@ class Stats:
     profile: str = "default"
     input_bytes: int = 0
     truncated_input: bool = False
+    encoding: str = "utf-8"
 
     @property
     def ratio(self) -> float:
@@ -76,6 +77,7 @@ class Stats:
             "profile": self.profile,
             "input_bytes": self.input_bytes,
             "truncated_input": self.truncated_input,
+            "encoding": self.encoding,
             "saved_ratio": round(self.ratio, 4),
         }
         return d
@@ -147,15 +149,17 @@ def detect_profile(text: str) -> str:
     return "default"
 
 
-def load_input(path: str, max_bytes: int = MAX_BYTES) -> tuple[str, int, bool]:
-    """读输入并清理 ANSI。二进制直接抛 ValueError，避免产出乱码。"""
+def load_input(path: str, max_bytes: int = MAX_BYTES,
+               encoding: str = "auto") -> tuple[str, int, bool, str]:
+    """读输入并清理 ANSI。二进制直接抛 ValueError，避免产出乱码。
+
+    编码默认 auto：BOM → UTF-8 → GB18030 → Latin-1，GBK 中文日志不会被误杀。
+    """
     data, cut = read_bytes(path, max_bytes)
     if looks_binary(data):
         raise ValueError("输入看起来是二进制文件，已拒绝压缩（可先 xxd/strings 处理）")
-    text = data.decode("utf-8", errors="replace")
-    if text.startswith("\ufeff"):
-        text = text[1:]
-    return clean_ansi(text), len(data), cut
+    text, used = decode_bytes(data, encoding)
+    return clean_ansi(text), len(data), cut, used
 
 
 def _fold_repeats(lines: list[str]) -> list[tuple[int, str, int]]:
@@ -324,4 +328,11 @@ def compress(
         return compress(lines, budget=tighter, head=head, tail=tail, max_line=max_line,
                         keep_errors=keep_errors, strict=strict, profile=profile,
                         _depth=_depth + 1)
+
+    # 硬上限的兜底：预算连一个省略标记都放不下时，宁可输出空也不超预算
+    if strict and stats.out_tokens > budget:
+        text = ""
+        stats.out_tokens = 0
+        stats.kept_lines = 0
+        stats.over_budget = False
     return CompressResult(text, stats)

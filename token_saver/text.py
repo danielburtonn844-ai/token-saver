@@ -1,8 +1,8 @@
-"""公共文本工具：token 估算、ANSI 清理、安全读取、二进制识别。
+"""公共文本工具：token 估算、ANSI 清理、编码识别、安全读取。
 
 所有模块共用这一份实现，避免四个脚本各抄一套系数导致结果不一致。
 系数经 bench/calibrate.py 对 cl100k_base 拟合：CJK 字 1.24、字母与空格 0.19、
-数字与符号 0.64。测试集中位误差 5.9%，p90 13.6%，详见 bench/CALIBRATION.md。
+数字与符号 0.64。测试集中位误差 4.9%，p90 7.2%，详见 bench/CALIBRATION.md。
 """
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ __all__ = [
     "SYMBOL_WEIGHT",
     "MAX_BYTES",
     "clean_ansi",
+    "decode_bytes",
     "est_tokens",
     "looks_binary",
     "read_bytes",
@@ -45,8 +46,17 @@ CJK_WEIGHT = 1.24
 LATIN_WEIGHT = 0.19
 SYMBOL_WEIGHT = 0.64
 
-# 默认单次读取上限，防止误把几个 G 的日志灌进内存。
 MAX_BYTES = 64 * 1024 * 1024
+
+BOMS = (
+    (b"\xef\xbb\xbf", "utf-8-sig"),
+    (b"\xff\xfe\x00\x00", "utf-32"),
+    (b"\x00\x00\xfe\xff", "utf-32"),
+    (b"\xff\xfe", "utf-16"),
+    (b"\xfe\xff", "utf-16"),
+)
+
+VALID_ENCODINGS = ("auto", "utf-8", "gb18030", "utf-16", "latin-1")
 
 
 def clean_ansi(text: str) -> str:
@@ -57,43 +67,106 @@ def clean_ansi(text: str) -> str:
 def est_tokens(text: str) -> int:
     """中英混合 token 估算（cl100k 校准）。
 
-    三类计权：CJK 字、字母与空格、数字与符号。实测中位误差约 6%，
-    p90 约 14%，可用于「压不压」的取舍，不要用来核对账单。
+    三类计权：CJK 字、字母与空格、数字与符号。实测中位误差约 4.9%，
+    p90 约 7.2%，可用于「压不压」的取舍，不要用来核对账单。
     """
     if not text:
         return 0
     cjk = len(CJK.findall(text))
-    cjk_punct = len(CJK_PUNCT.findall(text))  # 同时属于 CJK 与「非单词字符」，需从符号里扣掉
+    cjk_punct = len(CJK_PUNCT.findall(text))  # 同属 CJK 与「非单词字符」，需扣掉
     symbols = len(NONWORD.findall(text)) - cjk_punct + len(DIGIT.findall(text))
     other = len(text) - cjk - symbols
     return max(1, int(round(cjk * CJK_WEIGHT + other * LATIN_WEIGHT + symbols * SYMBOL_WEIGHT)))
 
 
+def _printable_ratio(text: str) -> float:
+    """可打印字符占比，用于判断 UTF-16 是不是真文本。"""
+    if not text:
+        return 0.0
+    good = sum(1 for ch in text if ch >= " " or ch in "\t\n\r")
+    return good / len(text)
+
+
+ASCII_PUNCT = set("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
+
+
+def _textual_ratio(text: str) -> float:
+    """像正经文本的字符占比：字母数字、空白、ASCII 标点。"""
+    if not text:
+        return 0.0
+    good = sum(1 for ch in text if ch.isalnum() or ch.isspace() or ch in ASCII_PUNCT)
+    return good / len(text)
+
+
+def _utf16_encoding(head: bytes) -> str | None:
+    """通过 NUL 分布判断是不是无 BOM 的 UTF-16。"""
+    if len(head) < 8 or b"\x00" not in head:
+        return None
+    half = len(head) // 2
+    for enc, lane in (("utf-16-le", 1), ("utf-16-be", 0)):
+        lane_zeros = sum(1 for i in range(lane, len(head), 2) if head[i] == 0)
+        if lane_zeros / half > 0.6:
+            try:
+                decoded = head.decode(enc, errors="ignore")
+            except LookupError:
+                continue
+            uniq = len(set(decoded))
+            if (_printable_ratio(decoded) > 0.9 and _textual_ratio(decoded) > 0.6
+                    and uniq >= 8 and ("\n" in decoded or " " in decoded or uniq >= 20)):
+                return enc
+    return None
+
+
 def looks_binary(data: bytes, sample: int = 8192) -> bool:
     """判断字节流是否像二进制。
 
-    先看 NUL（最可靠的信号），再按 UTF-8 解码后的替换字符比例判断：
-    正常 UTF-8 文本几乎不会产生 U+FFFD，二进制乱码会大量产生。
+    规则：有 BOM 一律当文本；有 NUL 的先用 UTF-16 试解码；
+    其余按 C0 控制字符比例判断（GBK 高位字节不算控制字符，因此不会误伤）。
     """
     if not data:
         return False
+    if any(data.startswith(bom) for bom, _ in BOMS):
+        return False
     head = data[:sample]
     if b"\x00" in head:
-        return True
-    decoded = head.decode("utf-8", errors="replace")
-    bad = decoded.count("\ufffd")
-    if decoded and bad / len(decoded) > 0.02:
-        return True
-    # 兜底：大量控制字符也算二进制
+        return _utf16_encoding(head) is None
     ctrl = sum(1 for b in head if b < 9 or 13 < b < 32 or b == 127)
     return ctrl / len(head) > 0.15
 
 
-def read_bytes(path: str, max_bytes: int = MAX_BYTES) -> tuple[bytes, bool]:
-    """读取文件或 stdin（path 为 ``-``）。
+def decode_bytes(data: bytes, encoding: str = "auto") -> tuple[str, str]:
+    """解码字节流，返回 ``(文本, 实际使用的编码)``。
 
-    返回 ``(数据, 是否被截断)``。stdin 只读一次，不做 seek。
+    auto 顺序：BOM → UTF-8 → GB18030 → Latin-1。GB18030 覆盖绝大多数
+    中文 Windows 日志，Latin-1 兜底保证不抛异常。
     """
+    if encoding not in ("auto", None):
+        return data.decode(encoding, errors="replace"), encoding
+
+    for bom, enc in BOMS:
+        if data.startswith(bom):
+            return data.decode(enc, errors="replace"), enc
+
+    utf16 = _utf16_encoding(data[:8192])
+    if utf16:
+        try:
+            return data.decode(utf16), utf16
+        except UnicodeDecodeError:
+            pass
+
+    try:
+        return data.decode("utf-8"), "utf-8"
+    except UnicodeDecodeError:
+        pass
+    try:
+        return data.decode("gb18030"), "gb18030"
+    except UnicodeDecodeError:
+        pass
+    return data.decode("latin-1", errors="replace"), "latin-1"
+
+
+def read_bytes(path: str, max_bytes: int = MAX_BYTES) -> tuple[bytes, bool]:
+    """读取文件或 stdin（path 为 ``-``）。返回 ``(数据, 是否被截断)``。"""
     if path == "-":
         stream = getattr(sys.stdin, "buffer", sys.stdin)
         data = stream.read(max_bytes + 1)
@@ -102,19 +175,18 @@ def read_bytes(path: str, max_bytes: int = MAX_BYTES) -> tuple[bytes, bool]:
         with open(path, "rb") as fh:
             data = fh.read(max_bytes + 1)
         if size > max_bytes:
-            data = data[:max_bytes]
-            return data, True
+            return data[:max_bytes], True
     if len(data) > max_bytes:
         return data[:max_bytes], True
     return data, False
 
 
-def read_text(path: str, max_bytes: int = MAX_BYTES) -> tuple[str, bool]:
-    """按 UTF-8 读取并替换坏字节，二进制输入不再抛 UnicodeDecodeError。"""
+def read_text(path: str, max_bytes: int = MAX_BYTES,
+              encoding: str = "auto") -> tuple[str, bool, str]:
+    """读取并按 auto/指定编码解码。返回 ``(文本, 是否截断, 实际编码)``。"""
     data, cut = read_bytes(path, max_bytes)
-    if data.startswith(b"\xef\xbb\xbf"):
-        data = data[3:]
-    return data.decode("utf-8", errors="replace"), cut
+    text, used = decode_bytes(data, encoding)
+    return text, cut, used
 
 
 def split_lines(text: str) -> list[str]:

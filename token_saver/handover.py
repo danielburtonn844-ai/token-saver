@@ -6,7 +6,7 @@ import os
 import re
 from dataclasses import dataclass, field
 
-from .text import est_tokens
+from .text import est_tokens, read_text
 
 __all__ = ["DEFAULT_MAX_TOKENS", "Issue", "TEMPLATE", "check", "create"]
 
@@ -114,10 +114,10 @@ def _meaningful(body: str) -> int:
     return n
 
 
-def check(path: str, max_tokens: int = DEFAULT_MAX_TOKENS) -> Report:
+def check(path: str, max_tokens: int = DEFAULT_MAX_TOKENS,
+          encoding: str = "auto") -> Report:
     """校验交接单，返回结构化报告。"""
-    with open(path, "r", encoding="utf-8", errors="replace") as fh:
-        text = fh.read()
+    text, _, _ = read_text(path, encoding=encoding)
     headings = [h.strip() for h in HEADING.findall(text)]
     bodies = _section_bodies(text)
     report = Report(path=path, tokens=est_tokens(text), lines=len(text.splitlines()))

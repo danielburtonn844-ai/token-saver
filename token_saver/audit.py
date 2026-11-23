@@ -34,13 +34,14 @@ class FileReport:
     long_lines: int = 0
     progress_lines: int = 0
     est_waste_tokens: int = 0
+    encoding: str = "utf-8"
     top_blocks: list = field(default_factory=list)
 
     def as_dict(self) -> dict:
         return asdict(self)
 
 
-def audit_text(name: str, text: str, top: int = 5) -> FileReport:
+def audit_text(name: str, text: str, top: int = 5, encoding: str = "utf-8") -> FileReport:
     """体检一段文本。空文本返回全零报告。"""
     text = clean_ansi(text)
     lines = text.splitlines()
@@ -52,6 +53,7 @@ def audit_text(name: str, text: str, top: int = 5) -> FileReport:
         blank_lines=sum(1 for ln in lines if not ln.strip()),
         long_lines=sum(1 for ln in lines if len(ln) > LONG_LINE),
         progress_lines=sum(1 for ln in lines if PROGRESS_RE.match(ln)),
+        encoding=encoding,
     )
 
     seen: set = set()

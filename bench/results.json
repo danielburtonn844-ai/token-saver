@@ -23,8 +23,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0048,
           "over_budget": true,
-          "seconds": 4.4,
-          "mb_per_s": 1.96,
+          "seconds": 4.213,
+          "mb_per_s": 2.05,
           "kept_lines": 30,
           "fabricated": []
         },
@@ -35,8 +35,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0048,
           "over_budget": true,
-          "seconds": 4.102,
-          "mb_per_s": 2.1,
+          "seconds": 4.409,
+          "mb_per_s": 1.96,
           "kept_lines": 39,
           "fabricated": []
         },
@@ -47,8 +47,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0048,
           "over_budget": false,
-          "seconds": 4.151,
-          "mb_per_s": 2.08,
+          "seconds": 5.225,
+          "mb_per_s": 1.65,
           "kept_lines": 42,
           "fabricated": []
         }
@@ -68,8 +68,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0075,
           "over_budget": false,
-          "seconds": 0.205,
-          "mb_per_s": 2.2,
+          "seconds": 0.229,
+          "mb_per_s": 1.97,
           "kept_lines": 10,
           "fabricated": []
         },
@@ -80,8 +80,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0075,
           "over_budget": false,
-          "seconds": 0.205,
-          "mb_per_s": 2.2,
+          "seconds": 0.216,
+          "mb_per_s": 2.09,
           "kept_lines": 20,
           "fabricated": []
         },
@@ -93,7 +93,7 @@
           "line_recall": 0.0075,
           "over_budget": false,
           "seconds": 0.231,
-          "mb_per_s": 1.96,
+          "mb_per_s": 1.95,
           "kept_lines": 20,
           "fabricated": []
         }
@@ -113,8 +113,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": true,
-          "seconds": 4.389,
-          "mb_per_s": 2.07,
+          "seconds": 5.717,
+          "mb_per_s": 1.59,
           "kept_lines": 9,
           "fabricated": []
         },
@@ -125,8 +125,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 4.524,
-          "mb_per_s": 2.01,
+          "seconds": 5.699,
+          "mb_per_s": 1.6,
           "kept_lines": 11,
           "fabricated": []
         },
@@ -137,8 +137,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 4.314,
-          "mb_per_s": 2.11,
+          "seconds": 5.671,
+          "mb_per_s": 1.6,
           "kept_lines": 16,
           "fabricated": []
         }
@@ -158,8 +158,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 3.558,
-          "mb_per_s": 1.21,
+          "seconds": 3.942,
+          "mb_per_s": 1.09,
           "kept_lines": 10,
           "fabricated": []
         },
@@ -170,8 +170,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 3.002,
-          "mb_per_s": 1.44,
+          "seconds": 2.571,
+          "mb_per_s": 1.68,
           "kept_lines": 20,
           "fabricated": []
         },
@@ -182,8 +182,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 5.99,
-          "mb_per_s": 0.72,
+          "seconds": 4.449,
+          "mb_per_s": 0.97,
           "kept_lines": 20,
           "fabricated": []
         }
@@ -203,8 +203,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 13.522,
-          "mb_per_s": 1.32,
+          "seconds": 15.277,
+          "mb_per_s": 1.17,
           "kept_lines": 3,
           "fabricated": []
         },
@@ -215,8 +215,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 12.168,
-          "mb_per_s": 1.47,
+          "seconds": 14.94,
+          "mb_per_s": 1.2,
           "kept_lines": 9,
           "fabricated": []
         },
@@ -227,8 +227,8 @@
           "error_recall": 1.0,
           "line_recall": null,
           "over_budget": false,
-          "seconds": 10.684,
-          "mb_per_s": 1.67,
+          "seconds": 11.846,
+          "mb_per_s": 1.51,
           "kept_lines": 16,
           "fabricated": []
         }
@@ -248,8 +248,8 @@
           "error_recall": 1.0,
           "line_recall": 1.0,
           "over_budget": false,
-          "seconds": 0.059,
-          "mb_per_s": 2.01,
+          "seconds": 0.073,
+          "mb_per_s": 1.63,
           "kept_lines": 17,
           "fabricated": []
         },
@@ -260,8 +260,8 @@
           "error_recall": 1.0,
           "line_recall": 1.0,
           "over_budget": false,
-          "seconds": 0.059,
-          "mb_per_s": 2.03,
+          "seconds": 0.073,
+          "mb_per_s": 1.64,
           "kept_lines": 20,
           "fabricated": []
         },
@@ -272,8 +272,8 @@
           "error_recall": 1.0,
           "line_recall": 1.0,
           "over_budget": false,
-          "seconds": 0.061,
-          "mb_per_s": 1.96,
+          "seconds": 0.071,
+          "mb_per_s": 1.67,
           "kept_lines": 20,
           "fabricated": []
         }
@@ -293,8 +293,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0075,
           "over_budget": false,
-          "seconds": 0.427,
-          "mb_per_s": 2.56,
+          "seconds": 0.443,
+          "mb_per_s": 2.46,
           "kept_lines": 6,
           "fabricated": []
         },
@@ -305,8 +305,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0075,
           "over_budget": false,
-          "seconds": 0.44,
-          "mb_per_s": 2.48,
+          "seconds": 0.399,
+          "mb_per_s": 2.74,
           "kept_lines": 13,
           "fabricated": []
         },
@@ -317,8 +317,8 @@
           "error_recall": 1.0,
           "line_recall": 0.0075,
           "over_budget": false,
-          "seconds": 0.452,
-          "mb_per_s": 2.42,
+          "seconds": 0.403,
+          "mb_per_s": 2.71,
           "kept_lines": 21,
           "fabricated": []
         }

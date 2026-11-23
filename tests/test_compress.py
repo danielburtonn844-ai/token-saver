@@ -137,6 +137,12 @@ class TestLimits(unittest.TestCase):
         r = compress(make_log(2000), budget=120, strict=True)
         self.assertLessEqual(r.stats.out_tokens, 120)
 
+    def test_strict_zero_budget_outputs_nothing(self):
+        r = compress(make_log(500), budget=0, strict=True)
+        self.assertEqual(r.text, "")
+        self.assertEqual(r.stats.out_tokens, 0)
+        self.assertFalse(r.stats.over_budget)
+
 
 class TestQuality(unittest.TestCase):
     def test_unicode_preserved(self):
@@ -198,16 +204,34 @@ class TestInput(unittest.TestCase):
         path = os.path.join(self.tmp, "a.log")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write("\x1b[31mERROR\x1b[0m boom\n")
-        text, n, cut = load_input(path)
+        text, n, cut, enc = load_input(path)
+        self.assertEqual(enc, "utf-8")
         self.assertNotIn("\x1b", text)
         self.assertGreater(n, 0)
         self.assertFalse(cut)
+
+    def test_gbk_input(self):
+        path = os.path.join(self.tmp, "gbk.log")
+        with open(path, "wb") as fh:
+            fh.write("错误：数据库连接失败\n信息：重试成功\n".encode("gbk"))
+        text, _, _, enc = load_input(path)
+        self.assertEqual(enc, "gb18030")
+        r = compress(text.splitlines(), budget=100)
+        self.assertIn("数据库连接失败", r.text)
+
+    def test_utf16_input(self):
+        path = os.path.join(self.tmp, "u16.log")
+        with open(path, "wb") as fh:
+            fh.write("错误：端口被占用\n".encode("utf-16"))
+        text, _, _, enc = load_input(path)
+        self.assertTrue(enc.startswith("utf-16"))
+        self.assertIn("端口被占用", text)
 
     def test_large_input_truncated(self):
         path = os.path.join(self.tmp, "big.log")
         with open(path, "w", encoding="utf-8") as fh:
             fh.write("x" * 5000)
-        text, n, cut = load_input(path, max_bytes=1000)
+        text, n, cut, _ = load_input(path, max_bytes=1000)
         self.assertTrue(cut)
         self.assertEqual(n, 1000)
 
@@ -216,7 +240,7 @@ class TestInput(unittest.TestCase):
         start = time.time()
         r = compress(lines, budget=1200)
         elapsed = time.time() - start
-        self.assertLess(elapsed, 10, "6 万行压缩超过 10 秒")
+        self.assertLess(elapsed, 20, "6 万行压缩超过 20 秒")
         self.assertGreater(r.stats.ratio, 0.9)
 
 

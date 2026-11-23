@@ -144,6 +144,7 @@ sqlite3 db.sqlite "select count(*) from users;"
 python3 scripts/compress_toolout.py [--file F] [--budget N]
     [--profile default|build|test|json|traversal|auto]
     [--strict] [--no-keep-errors] [--stats|--json] [--out F]
+    [--encoding auto|utf-8|gb18030|utf-16|latin-1]
 ```
 
 行为：

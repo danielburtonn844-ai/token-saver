@@ -66,6 +66,12 @@ class TestCompressCLI(unittest.TestCase):
         r = run([os.path.join(SCRIPTS, "compress_toolout.py"), "--budget", "-5"])
         self.assertEqual(r.returncode, 2)
 
+    def test_gbk_stdin(self):
+        data = "错误：数据库连接失败\n信息：重试\n".encode("gbk") * 20
+        r = run([os.path.join(SCRIPTS, "compress_toolout.py"), "--budget", "100"], stdin=data)
+        self.assertEqual(r.returncode, 0)
+        self.assertIn("数据库连接失败", r.stdout.decode("utf-8", errors="replace"))
+
     @unittest.skipIf(os.name == "nt", "bash 包装器只在类 Unix 上测")
     def test_tk_wrapper(self):
         r = subprocess.run(["bash", os.path.join(SCRIPTS, "tk"), "150"],
@@ -98,8 +104,16 @@ class TestAuditCLI(unittest.TestCase):
         r = run([os.path.join(SCRIPTS, "tk_audit.py")])
         self.assertEqual(r.returncode, 2)
 
+    def test_missing_dir(self):
+        r = run([os.path.join(SCRIPTS, "tk_audit.py"), "--dir", "/nope/missing"])
+        self.assertEqual(r.returncode, 3)
+
 
 class TestPackCLI(unittest.TestCase):
+    def test_missing_dir(self):
+        r = run([os.path.join(SCRIPTS, "ctx_pack.py"), "/nope/missing"])
+        self.assertEqual(r.returncode, 3)
+
     def test_json(self):
         r = run([os.path.join(SCRIPTS, "ctx_pack.py"), ROOT, "--json", "--max-files", "5"])
         self.assertEqual(r.returncode, 0)
@@ -141,7 +155,8 @@ class TestDoctorCLI(unittest.TestCase):
 
     def test_module_entry(self):
         r = run(["-m", "token_saver", "doctor", "--json"])
-        self.assertEqual(r.returncode, 0)
+        # 退出码取决于本机安装状态，这里只验证入口能跑通并输出合法 JSON
+        self.assertIn(r.returncode, (0, 1))
         self.assertIn("checks", json.loads(r.stdout.decode()))
 
 

@@ -5,6 +5,7 @@ import argparse
 import csv
 import io
 import json
+import os
 import sys
 
 from . import __version__
@@ -13,7 +14,7 @@ from . import compress as comp
 from . import doctor as doctor_mod
 from . import handover as handover_mod
 from . import pack as pack_mod
-from .text import MAX_BYTES
+from .text import MAX_BYTES, VALID_ENCODINGS
 
 
 def _force_utf8() -> None:
@@ -54,10 +55,12 @@ def compress_main(argv: list[str] | None = None) -> int:
     ap.add_argument("--json", action="store_true", help="统计以 JSON 写到 stderr")
     ap.add_argument("--out", help="正文写入文件而不是 stdout")
     ap.add_argument("--max-bytes", type=int, default=MAX_BYTES, help="读取上限，默认 64MB")
+    ap.add_argument("--encoding", default="auto", choices=VALID_ENCODINGS,
+                    help="输入编码，默认自动识别（UTF-8/GB18030/UTF-16）")
     args = ap.parse_args(argv)
 
     try:
-        text, nbytes, cut = comp.load_input(args.file, args.max_bytes)
+        text, nbytes, cut, used = comp.load_input(args.file, args.max_bytes, args.encoding)
     except FileNotFoundError:
         print(f"找不到文件：{args.file}", file=sys.stderr)
         return EXIT_INPUT
@@ -88,6 +91,7 @@ def compress_main(argv: list[str] | None = None) -> int:
     stats = result.stats
     stats.input_bytes = nbytes
     stats.truncated_input = cut
+    stats.encoding = used
 
     body = result.text
     if args.file not in ("-", None):
@@ -128,10 +132,14 @@ def audit_main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ext", action="append", default=[], help="只体检这些扩展名，可重复")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--csv", action="store_true")
+    ap.add_argument("--encoding", default="auto", choices=VALID_ENCODINGS)
     args = ap.parse_args(argv)
 
     targets = list(args.paths)
     if args.dir:
+        if not os.path.isdir(args.dir):
+            print(f"目录不存在：{args.dir}", file=sys.stderr)
+            return EXIT_INPUT
         exts = [e.lower().lstrip(".") for e in args.ext]
         targets += list(audit_mod.iter_files(args.dir, args.max_files, args.exclude, exts))
     if not targets:
@@ -142,8 +150,8 @@ def audit_main(argv: list[str] | None = None) -> int:
     for t in targets:
         try:
             from .text import read_text
-            data, _ = read_text(t)
-            reports.append(audit_mod.audit_text(t, data, args.top))
+            data, _, used = read_text(t, encoding=args.encoding)
+            reports.append(audit_mod.audit_text(t, data, args.top, used))
         except Exception as exc:  # noqa: BLE001 - 单个文件失败不该中断整批
             print(f"跳过 {t}: {exc}", file=sys.stderr)
 
@@ -177,10 +185,15 @@ def pack_main(argv: list[str] | None = None) -> int:
     ap.add_argument("--exclude", action="append", default=[])
     ap.add_argument("-o", "--out")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--encoding", default="auto", choices=VALID_ENCODINGS)
     args = ap.parse_args(argv)
 
+    if not os.path.isdir(args.root):
+        print(f"目录不存在：{args.root}", file=sys.stderr)
+        return EXIT_INPUT
+
     card, entries = pack_mod.build_card(
-        args.root, args.depth, args.max_files, args.include, args.exclude
+        args.root, args.depth, args.max_files, args.include, args.exclude, args.encoding
     )
     if args.json:
         payload = pack_mod.to_json(args.root, entries)
@@ -212,10 +225,12 @@ def handover_main(argv: list[str] | None = None) -> int:
     p_check.add_argument("path")
     p_check.add_argument("--max-tokens", type=int, default=handover_mod.DEFAULT_MAX_TOKENS)
     p_check.add_argument("--json", action="store_true")
+    p_check.add_argument("--encoding", default="auto", choices=VALID_ENCODINGS)
 
     p_show = sub.add_parser("show", help="打印并估算")
     p_show.add_argument("path")
     p_show.add_argument("--json", action="store_true")
+    p_show.add_argument("--encoding", default="auto", choices=VALID_ENCODINGS)
 
     args = ap.parse_args(argv)
 
@@ -232,7 +247,7 @@ def handover_main(argv: list[str] | None = None) -> int:
 
     try:
         if args.cmd == "check":
-            report = handover_mod.check(args.path, args.max_tokens)
+            report = handover_mod.check(args.path, args.max_tokens, args.encoding)
             if args.json:
                 print(report.to_json())
             else:
@@ -241,8 +256,8 @@ def handover_main(argv: list[str] | None = None) -> int:
                 print(f"{'通过' if report.ok else '未通过'}："
                       f"{report.tokens} token / {report.lines} 行")
             return EXIT_OK if report.ok else EXIT_FAIL
-        with open(args.path, encoding="utf-8", errors="replace") as fh:
-            text = fh.read()
+        from .text import read_text
+        text, _, _ = read_text(args.path, encoding=args.encoding)
         if args.json:
             print(json.dumps({"path": args.path,
                               "tokens": handover_mod.est_tokens(text),

@@ -6,6 +6,7 @@ from token_saver.text import (
     ANSI,
     CJK,
     clean_ansi,
+    decode_bytes,
     est_tokens,
     looks_binary,
     read_bytes,
@@ -75,16 +76,16 @@ class TestRead(unittest.TestCase):
             fh.write(data)
         return path
 
-    def test_bad_utf8_replaced(self):
+    def test_bad_utf8_falls_back(self):
         path = self._write(b"ok \xff\xfe end")
-        text, cut = read_text(path)
+        text, cut, enc = read_text(path)
         self.assertFalse(cut)
         self.assertIn("ok", text)
-        self.assertIn("\ufffd", text)
+        self.assertIn(enc, ("latin-1", "gb18030"))
 
     def test_bom_stripped(self):
         path = self._write(b"\xef\xbb\xbfhello")
-        text, _ = read_text(path)
+        text, _, _ = read_text(path)
         self.assertEqual(text, "hello")
 
     def test_truncation_flag(self):
@@ -95,12 +96,37 @@ class TestRead(unittest.TestCase):
 
     def test_crlf(self):
         path = self._write(b"a\r\nb\r\n")
-        text, _ = read_text(path)
+        text, _, _ = read_text(path)
         self.assertEqual(split_lines(text), ["a", "b"])
 
     def test_missing_file_raises(self):
         with self.assertRaises(OSError):
             read_text(os.path.join(self.tmp, "nope"))
+
+    def test_gbk_log_not_binary(self):
+        data = "错误：数据库连接失败\n信息：重试成功\n".encode("gbk")
+        self.assertFalse(looks_binary(data))
+        text, enc = decode_bytes(data)
+        self.assertEqual(enc, "gb18030")
+        self.assertIn("数据库连接失败", text)
+
+    def test_utf16_with_bom(self):
+        data = "错误：端口被占用\n".encode("utf-16")
+        self.assertFalse(looks_binary(data))
+        text, enc = decode_bytes(data)
+        self.assertTrue(enc.startswith("utf-16"))
+        self.assertIn("端口被占用", text)
+
+    def test_explicit_encoding(self):
+        data = "中文日志".encode("gbk")
+        text, enc = decode_bytes(data, "gb18030")
+        self.assertEqual((text, enc), ("中文日志", "gb18030"))
+
+    def test_latin1_fallback(self):
+        data = b"caf\xe9 \xff\xfe"
+        text, enc = decode_bytes(data)
+        self.assertIn("caf", text)
+        self.assertIn(enc, ("latin-1", "utf-8", "gb18030"))
 
 
 if __name__ == "__main__":
