@@ -16,9 +16,12 @@ CJK = "/usr/share/fonts/wqy-zenhei/wqy-zenhei.ttc"
 img = Image.new("RGB", (W, H), BG)
 d = ImageDraw.Draw(img)
 
-fb = lambda s: ImageFont.truetype(LATIN_B, s)
-fr = lambda s: ImageFont.truetype(LATIN, s)
-fc = lambda s: ImageFont.truetype(CJK, s, index=0)
+def fb(s):
+    return ImageFont.truetype(LATIN_B, s)
+def fr(s):
+    return ImageFont.truetype(LATIN, s)
+def fc(s):
+    return ImageFont.truetype(CJK, s, index=0)
 
 M = 96
 d.text((M, 70), "danielburtonn844-ai", font=fr(26), fill=MUTED)

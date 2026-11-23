@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "token-saver"
+version = "2.1.0"
+description = "省 token 但不降智：工具输出压缩、token 体检、目录索引卡、跨会话交接单"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "danielburtonn844-ai" }]
+keywords = ["llm", "tokens", "context", "cli", "agent"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+  "Environment :: Console",
+  "Topic :: Utilities",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.4", "tiktoken>=0.6"]
+
+[project.scripts]
+tk = "token_saver.cli:compress_main"
+tk-audit = "token_saver.cli:audit_main"
+tk-pack = "token_saver.cli:pack_main"
+tk-handover = "token_saver.cli:handover_main"
+tk-doctor = "token_saver.cli:doctor_main"
+
+[project.urls]
+Homepage = "https://github.com/danielburtonn844-ai/token-saver"
+
+[tool.setuptools]
+packages = ["token_saver"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

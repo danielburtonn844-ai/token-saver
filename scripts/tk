@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
-# tk — 一行压缩：cmd 2>&1 | tk [预算token]
+# tk — 一行压缩：cmd 2>&1 | tk [预算token] [额外参数...]
 # 例：npm run build 2>&1 | tk 1200
+#     cat build.log | tk --profile build --strict
 set -euo pipefail
-BUDGET="${1:-1500}"
-exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/compress_toolout.py" --budget "$BUDGET"
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ $# -eq 0 ]; then
+  exec python3 "$DIR/compress_toolout.py"
+fi
+
+case "$1" in
+  -h|--help|-*) exec python3 "$DIR/compress_toolout.py" "$@" ;;
+  *[!0-9]*) exec python3 "$DIR/compress_toolout.py" "$@" ;;
+  *) BUDGET="$1"; shift; exec python3 "$DIR/compress_toolout.py" --budget "$BUDGET" "$@" ;;
+esac

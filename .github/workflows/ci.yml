@@ -4,18 +4,58 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  smoke:
+  test:
+    name: py${{ matrix.python }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: 单元测试
+        run: python -m unittest discover -s tests -t . -v
+      - name: 安装与卸载冒烟（仅类 Unix）
+        if: runner.os != 'Windows'
+        run: bash tests/smoke.sh
+
+  quality:
+    name: lint + 打包
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-      - name: syntax
+          python-version: "3.12"
+      - run: pip install ruff build
+      - run: ruff check .
+      - run: python -m build
+      - name: 安装 wheel 并验证命令
         run: |
-          python3 -m py_compile scripts/*.py
-          bash -n scripts/install.sh
-      - name: smoke
-        run: bash tests/smoke.sh
+          pip install dist/*.whl
+          tk --version
+          tk-doctor --json > /dev/null || true
+
+  bench:
+    name: 基准（不阻塞）
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python bench/bench.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bench-results
+          path: |
+            bench/RESULTS.md
+            bench/results.json

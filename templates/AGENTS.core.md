@@ -1,4 +1,4 @@
-# token-saver 常驻内核 v2
+# token-saver 常驻内核 v2.1
 
 本仓库有三条常驻规则，每个会话都生效：
 
