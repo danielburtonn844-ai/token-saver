@@ -64,6 +64,17 @@ class TestScripts(unittest.TestCase):
                                     msg=f"{fn} 引入了第三方依赖 {mod}")
 
 
+class TestShellPortability(unittest.TestCase):
+    """macOS 自带 bash 3.2 不认多字节字符，$VAR 后面紧跟中文会被当成变量名。"""
+
+    def test_no_variable_touching_nonascii(self):
+        pattern = re.compile(r"\$[A-Za-z_][A-Za-z0-9_]*[^\x00-\x7F]")
+        for rel in ("scripts/install.sh", "scripts/tk", "tests/smoke.sh"):
+            src = read(rel)
+            hits = pattern.findall(src)
+            self.assertFalse(hits, "%s 里 $VAR 紧跟非 ASCII 字符：%s" % (rel, hits))
+
+
 class TestDocs(unittest.TestCase):
     def test_readme_has_key_sections(self):
         text = read("README.md")

@@ -73,7 +73,7 @@ case "$TARGET" in
     elif [ -d "$HOME/.codex" ]; then TARGET="codex"
     else TARGET="project"; fi ;;
   minis|claude|codex|project|custom) ;;
-  *) die "未知 target: $TARGET（可选 auto/minis/claude/codex/project/custom）" ;;
+  *) die "未知 target: ${TARGET}（可选 auto/minis/claude/codex/project/custom）" ;;
 esac
 
 case "$TARGET" in
@@ -102,7 +102,7 @@ need_writable() {
   local p="$1" probe="$1"
   while [ ! -e "$probe" ] && [ "$probe" != "/" ]; do probe="$(dirname "$probe")"; done
   if [ ! -w "$probe" ]; then
-    die "没有写权限: $p（当前用户 $(id -un)）。换 --dir 到可写位置，或用有权限的用户运行"
+    die "没有写权限: ${p}（当前用户 $(id -un)）。换 --dir 到可写位置，或用有权限的用户运行"
   fi
 }
 
@@ -158,7 +158,7 @@ do_uninstall() {
       log "[dry] 移除 $SKILL_DIR"
     elif [ "$BACKUP" = 1 ]; then
       mv "$SKILL_DIR" "$SKILL_DIR.removed.$TS"
-      log "已移到 $SKILL_DIR.removed.$TS（确认无用后可删）"
+      log "已移到 $SKILL_DIR.removed.${TS}（确认无用后可删）"
     else
       rm -rf "$SKILL_DIR"
       log "已删除 $SKILL_DIR"
