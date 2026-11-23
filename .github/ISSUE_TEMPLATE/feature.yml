@@ -1,0 +1,27 @@
+name: 功能建议
+description: 想加的能力或想改的行为
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你遇到的真实问题
+      description: 描述场景和损失，不要先给方案
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: 你希望的解决方式
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 影响范围
+      options:
+        - 压缩算法 / 保真
+        - token 估算
+        - 安装 / 卸载
+        - 文档
+        - 其他
+    validations:
+      required: true

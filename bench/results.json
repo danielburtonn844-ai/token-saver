@@ -1,0 +1,328 @@
+{
+  "version": "2.1.0",
+  "python": "3.12.15",
+  "platform": "Linux-4.19.152-perf+-aarch64-with",
+  "machine": "aarch64",
+  "budgets": [
+    300,
+    800,
+    1500
+  ],
+  "results": [
+    {
+      "corpus": "build_log",
+      "lines": 120000,
+      "bytes": 8631950,
+      "raw_tokens": 3613333,
+      "distinct_errors": 1,
+      "rows": [
+        {
+          "budget": 300,
+          "out_tokens": 864,
+          "ratio": 0.9998,
+          "error_recall": 1.0,
+          "line_recall": 0.0048,
+          "over_budget": true,
+          "seconds": 4.4,
+          "mb_per_s": 1.96,
+          "kept_lines": 30,
+          "fabricated": []
+        },
+        {
+          "budget": 800,
+          "out_tokens": 1144,
+          "ratio": 0.9997,
+          "error_recall": 1.0,
+          "line_recall": 0.0048,
+          "over_budget": true,
+          "seconds": 4.102,
+          "mb_per_s": 2.1,
+          "kept_lines": 39,
+          "fabricated": []
+        },
+        {
+          "budget": 1500,
+          "out_tokens": 1219,
+          "ratio": 0.9997,
+          "error_recall": 1.0,
+          "line_recall": 0.0048,
+          "over_budget": false,
+          "seconds": 4.151,
+          "mb_per_s": 2.08,
+          "kept_lines": 42,
+          "fabricated": []
+        }
+      ]
+    },
+    {
+      "corpus": "test_output",
+      "lines": 8534,
+      "bytes": 451858,
+      "raw_tokens": 151674,
+      "distinct_errors": 2,
+      "rows": [
+        {
+          "budget": 300,
+          "out_tokens": 238,
+          "ratio": 0.9984,
+          "error_recall": 1.0,
+          "line_recall": 0.0075,
+          "over_budget": false,
+          "seconds": 0.205,
+          "mb_per_s": 2.2,
+          "kept_lines": 10,
+          "fabricated": []
+        },
+        {
+          "budget": 800,
+          "out_tokens": 397,
+          "ratio": 0.9974,
+          "error_recall": 1.0,
+          "line_recall": 0.0075,
+          "over_budget": false,
+          "seconds": 0.205,
+          "mb_per_s": 2.2,
+          "kept_lines": 20,
+          "fabricated": []
+        },
+        {
+          "budget": 1500,
+          "out_tokens": 397,
+          "ratio": 0.9974,
+          "error_recall": 1.0,
+          "line_recall": 0.0075,
+          "over_budget": false,
+          "seconds": 0.231,
+          "mb_per_s": 1.96,
+          "kept_lines": 20,
+          "fabricated": []
+        }
+      ]
+    },
+    {
+      "corpus": "json_dump",
+      "lines": 60000,
+      "bytes": 9091915,
+      "raw_tokens": 3967076,
+      "distinct_errors": 0,
+      "rows": [
+        {
+          "budget": 300,
+          "out_tokens": 648,
+          "ratio": 0.9998,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": true,
+          "seconds": 4.389,
+          "mb_per_s": 2.07,
+          "kept_lines": 9,
+          "fabricated": []
+        },
+        {
+          "budget": 800,
+          "out_tokens": 781,
+          "ratio": 0.9998,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 4.524,
+          "mb_per_s": 2.01,
+          "kept_lines": 11,
+          "fabricated": []
+        },
+        {
+          "budget": 1500,
+          "out_tokens": 1097,
+          "ratio": 0.9997,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 4.314,
+          "mb_per_s": 2.11,
+          "kept_lines": 16,
+          "fabricated": []
+        }
+      ]
+    },
+    {
+      "corpus": "traversal",
+      "lines": 80001,
+      "bytes": 4312339,
+      "raw_tokens": 1643894,
+      "distinct_errors": 0,
+      "rows": [
+        {
+          "budget": 300,
+          "out_tokens": 198,
+          "ratio": 0.9999,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 3.558,
+          "mb_per_s": 1.21,
+          "kept_lines": 10,
+          "fabricated": []
+        },
+        {
+          "budget": 800,
+          "out_tokens": 386,
+          "ratio": 0.9998,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 3.002,
+          "mb_per_s": 1.44,
+          "kept_lines": 20,
+          "fabricated": []
+        },
+        {
+          "budget": 1500,
+          "out_tokens": 386,
+          "ratio": 0.9998,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 5.99,
+          "mb_per_s": 0.72,
+          "kept_lines": 20,
+          "fabricated": []
+        }
+      ]
+    },
+    {
+      "corpus": "access_log",
+      "lines": 150000,
+      "bytes": 17889979,
+      "raw_tokens": 8479587,
+      "distinct_errors": 0,
+      "rows": [
+        {
+          "budget": 300,
+          "out_tokens": 180,
+          "ratio": 1.0,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 13.522,
+          "mb_per_s": 1.32,
+          "kept_lines": 3,
+          "fabricated": []
+        },
+        {
+          "budget": 800,
+          "out_tokens": 503,
+          "ratio": 0.9999,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 12.168,
+          "mb_per_s": 1.47,
+          "kept_lines": 9,
+          "fabricated": []
+        },
+        {
+          "budget": 1500,
+          "out_tokens": 882,
+          "ratio": 0.9999,
+          "error_recall": 1.0,
+          "line_recall": null,
+          "over_budget": false,
+          "seconds": 10.684,
+          "mb_per_s": 1.67,
+          "kept_lines": 16,
+          "fabricated": []
+        }
+      ]
+    },
+    {
+      "corpus": "stacktrace",
+      "lines": 3000,
+      "bytes": 119249,
+      "raw_tokens": 30926,
+      "distinct_errors": 1,
+      "rows": [
+        {
+          "budget": 300,
+          "out_tokens": 251,
+          "ratio": 0.9919,
+          "error_recall": 1.0,
+          "line_recall": 1.0,
+          "over_budget": false,
+          "seconds": 0.059,
+          "mb_per_s": 2.01,
+          "kept_lines": 17,
+          "fabricated": []
+        },
+        {
+          "budget": 800,
+          "out_tokens": 282,
+          "ratio": 0.9909,
+          "error_recall": 1.0,
+          "line_recall": 1.0,
+          "over_budget": false,
+          "seconds": 0.059,
+          "mb_per_s": 2.03,
+          "kept_lines": 20,
+          "fabricated": []
+        },
+        {
+          "budget": 1500,
+          "out_tokens": 282,
+          "ratio": 0.9909,
+          "error_recall": 1.0,
+          "line_recall": 1.0,
+          "over_budget": false,
+          "seconds": 0.061,
+          "mb_per_s": 1.96,
+          "kept_lines": 20,
+          "fabricated": []
+        }
+      ]
+    },
+    {
+      "corpus": "chinese_log",
+      "lines": 12000,
+      "bytes": 1092767,
+      "raw_tokens": 520172,
+      "distinct_errors": 1,
+      "rows": [
+        {
+          "budget": 300,
+          "out_tokens": 290,
+          "ratio": 0.9994,
+          "error_recall": 1.0,
+          "line_recall": 0.0075,
+          "over_budget": false,
+          "seconds": 0.427,
+          "mb_per_s": 2.56,
+          "kept_lines": 6,
+          "fabricated": []
+        },
+        {
+          "budget": 800,
+          "out_tokens": 585,
+          "ratio": 0.9989,
+          "error_recall": 1.0,
+          "line_recall": 0.0075,
+          "over_budget": false,
+          "seconds": 0.44,
+          "mb_per_s": 2.48,
+          "kept_lines": 13,
+          "fabricated": []
+        },
+        {
+          "budget": 1500,
+          "out_tokens": 919,
+          "ratio": 0.9982,
+          "error_recall": 1.0,
+          "line_recall": 0.0075,
+          "over_budget": false,
+          "seconds": 0.452,
+          "mb_per_s": 2.42,
+          "kept_lines": 21,
+          "fabricated": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,15 @@
 ---
 name: token-saver
-description: 省 token 但不降智的完整作业体系（v2）。当用户提到省 TK / 省 token / 上下文太长 / 贵 / 慢，或任务需要多轮工具调用、批量读文件、爬网页、长会话时加载。核心判据：省的是「搬运」，不是「核实」。含成本模型、工具输出压缩协议、子代理经济学、跨会话 HANDOVER、缓存友好、反降智红线与自检脚本。
-version: 2.0.0
+description: 省 token 但不降智的完整作业体系（v2.1）。当用户提到省 TK / 省 token / 上下文太长 / 贵 / 慢，或任务需要多轮工具调用、批量读文件、爬网页、长会话时加载。核心判据：省的是「搬运」，不是「核实」。含成本模型、工具输出压缩协议、子代理经济学、跨会话 HANDOVER、缓存友好、反降智红线与自检脚本。
+version: 2.1.0
 license: MIT
 allowed-tools: [Read, Grep, Glob, Shell, Bash, Edit, Write]
 ---
 
 # token-saver v2 —— 省 TK 不降智
 
+> 版本 2.1.0 · 工具链可复现基准见 `bench/RESULTS.md`
+>
 > 一句话总纲：**省「搬运」，不省「核实」；省「重复」，不省「推理」。**
 > 任何能降低结论可靠性的地方，一分钱都不许省。
 
@@ -114,10 +116,18 @@ rg -l "pattern" . | head -20
 
 ```bash
 python3 scripts/compress_toolout.py --file /tmp/x.log --budget 2000
-some_long_command | python3 scripts/compress_toolout.py --budget 1500 --keep-errors
+some_long_command | python3 scripts/compress_toolout.py --budget 1500
+cat api.json | python3 scripts/compress_toolout.py --profile json --strict
 ```
 
-它会做：去重计数 → 保留头尾 → 优先保留错误/警告/数字行 → 超长行截断 → 输出省略标记与原始路径。
+它会做：去 ANSI → 截超长行 → 折叠连续重复 → 按签名合并同型行 → 保留头尾 →
+错误行不参与预算裁剪 → 按分数补满预算 → 输出省略标记与原始路径。
+
+预算默认是软上限（头尾与错误行受保护），要硬上限加 `--strict`。
+错误按「签名」折叠：同一类错误只留一个样本并标注次数，保证每种错误都看得见。
+
+实测（`bench/RESULTS.md`，可复现）：12 万行构建日志 3,613,333 tk → 1,219 tk，
+错误签名召回 100%，耗时 4.4 秒。
 
 ---
 
@@ -268,23 +278,31 @@ some_long_command | python3 scripts/compress_toolout.py --budget 1500 --keep-err
 
 脚本：
 
-| 脚本 | 用途 |
+| 命令 | 用途 |
 |---|---|
-| `scripts/tk_audit.py` | 给会话记录/文件做 token 体检，找浪费点 |
-| `scripts/compress_toolout.py` | 工具输出压缩，按预算保留关键行 |
-| `scripts/handover.py` | HANDOVER.md 生成 / 校验 / 读取 |
-| `scripts/ctx_pack.py` | 目录生成索引卡（渐进式披露） |
-| `scripts/install.sh` | 装到技能目录 + 注入常驻内核 |
+| `tk-audit` | 给会话记录/文件做 token 体检，找浪费点 |
+| `tk` | 工具输出压缩，按预算保留关键行 |
+| `tk-handover` | HANDOVER.md 生成 / 校验 / 读取 |
+| `tk-pack` | 目录生成索引卡（渐进式披露） |
+| `tk-doctor` | 检查安装状态、内核块、PATH |
+| `scripts/install.sh` | 安装 / 升级 / 卸载 / 状态 |
+
+没装 pip 包时，等价的 `python3 scripts/<名字>.py` 一样能用。
 
 ---
 
 ## 12. 安装：让新会话自动生效
 
 ```bash
-bash scripts/install.sh --target auto     # 自动探测 Claude Code / Codex / Cursor / Minis
-bash scripts/install.sh --target minis    # 只装 Minis
-bash scripts/install.sh --core-only       # 只注入 200 token 常驻内核
+bash scripts/install.sh --target auto --dry-run   # 先看计划
+bash scripts/install.sh --target auto             # 自动探测 Minis / Claude Code / Codex
+bash scripts/install.sh --target minis            # 只装 Minis
+bash scripts/install.sh --target claude --status  # 查状态
+bash scripts/install.sh --target claude --uninstall
+bash scripts/install.sh --core-only               # 只注入 200 token 常驻内核
 ```
+
+写入用标记块包裹、原子替换、默认备份，重复执行是原地升级不会追加第二份。
 
 常驻内核（`templates/AGENTS.core.md`）只有三条，控制在 200 token 内：
 先落盘再提取 / 超 20KB 或 6 轮就外派 / 结论写文件。细则按需读本文件。

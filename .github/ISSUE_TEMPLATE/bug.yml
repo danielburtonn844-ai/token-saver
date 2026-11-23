@@ -1,0 +1,41 @@
+name: Bug 报告
+description: 脚本报错、输出不对、安装失败
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先跑 `tk-doctor --json`，把结果贴上来能省一轮往返。
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: `tk --version` 或 `git rev-parse --short HEAD`
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: 环境
+      description: 系统 / 架构 / Python 版本
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现命令
+      description: 能直接复制执行的最小命令
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望 vs 实际
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: tk-doctor 输出
+      render: json

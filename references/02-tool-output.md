@@ -141,7 +141,9 @@ sqlite3 db.sqlite "select count(*) from users;"
 ## 11. 输出压缩器用法
 
 ```bash
-python3 scripts/compress_toolout.py [--file F] [--budget N] [--keep-errors] [--stats]
+python3 scripts/compress_toolout.py [--file F] [--budget N]
+    [--profile default|build|test|json|traversal|auto]
+    [--strict] [--no-keep-errors] [--stats|--json] [--out F]
 ```
 
 行为：
