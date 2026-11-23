@@ -15,6 +15,16 @@ from . import handover as handover_mod
 from . import pack as pack_mod
 from .text import MAX_BYTES
 
+
+def _force_utf8() -> None:
+    """Windows 控制台默认 cp1252，打印中文会抛 UnicodeEncodeError 或写成 \\uXXXX。"""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
 EXIT_OK = 0
 EXIT_FAIL = 1
 EXIT_USAGE = 2
@@ -23,6 +33,7 @@ EXIT_OUTPUT = 4
 
 
 def _parser(prog: str, desc: str) -> argparse.ArgumentParser:
+    _force_utf8()
     ap = argparse.ArgumentParser(prog=prog, description=desc)
     ap.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     return ap

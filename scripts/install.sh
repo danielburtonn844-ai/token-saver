@@ -14,6 +14,8 @@
 #   bash scripts/install.sh --skill-only         # 只复制技能
 #   bash scripts/install.sh --no-backup --force  # 覆盖且不留备份
 set -euo pipefail
+export PYTHONUTF8=1
+export PYTHONIOENCODING=utf-8
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="$(sed -n 's/^version:[[:space:]]*//p' "$SRC/SKILL.md" 2>/dev/null | head -1)"
